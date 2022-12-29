@@ -4,7 +4,7 @@ import { getImages, normalizeImages } from 'services/api';
 import SearchBar from './SearchBar/SearchBar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
-import Spinner from './Spinner/Spinner';
+import Loader from './Loader/Loader';
 
 export default class App extends Component {
   state = {
@@ -37,10 +37,6 @@ export default class App extends Component {
         this.setState({ loading: false });
       }
     }
-
-    // if (prevState.error !== error && error) {
-    //   alert(error);
-    // }
   };
 
   getQuery = query => {
@@ -65,7 +61,7 @@ export default class App extends Component {
 
         {showLoadMore && <Button onClick={this.incrementPage} />}
 
-        {loading && <Spinner />}
+        {loading && <Loader />}
 
         {error && <p>{error}</p>}
       </div>
