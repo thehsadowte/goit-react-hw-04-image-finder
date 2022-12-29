@@ -44,7 +44,7 @@ export default class App extends Component {
       alert('same query, try change your request');
       return;
     }
-    this.setState({ query, images: [], page: 1 });
+    this.setState({ query, images: [], page: 1, totalImages: 0 });
   };
 
   incrementPage = () => this.setState(prev => ({ page: prev.page + 1 }));
