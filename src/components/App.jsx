@@ -1,70 +1,75 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { getImages, normalizeImages } from 'services/api';
 
-import SearchBar from './SearchBar/SearchBar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
 import Loader from './Loader/Loader';
+import SearchBar from './SearchBar/SearchBar';
 
-export default class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    page: 1,
-    loading: false,
-    error: '',
-    totalImages: 0,
-  };
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [totalImages, setTotalImages] = useState(0);
 
-  componentDidUpdate = async (_, prevState) => {
-    const { query, page } = this.state;
-    if (prevState.query !== query || prevState.page !== page) {
-      this.setState({ loading: true, error: '' });
+  useEffect(() => {
+    if (!query) return;
+
+    const fetchImages = async () => {
+      setLoading(true);
+      setError('');
+
       try {
         const { hits, totalHits } = await getImages(query, page);
 
         const normalizedImages = normalizeImages(hits);
 
-        this.setState(prevState => {
-          return {
-            images: [...prevState.images, ...normalizedImages],
-            totalImages: totalHits,
-          };
-        });
-      } catch (error) {
-        this.setState({ error: 'something went wrong' });
-      } finally {
-        this.setState({ loading: false });
-      }
-    }
-  };
+        setImages(prev => [...prev, ...normalizedImages]);
 
-  getQuery = query => {
-    if (query === this.state.query) {
+        setTotalImages(totalHits);
+
+        if (totalHits === 0) {
+          alert('Sorry, no images were found');
+        }
+      } catch (error) {
+        setError('something went wrong');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchImages();
+  }, [query, page]);
+
+  const getQuery = searchQuery => {
+    if (searchQuery === query) {
       alert('same query, try change your request');
       return;
     }
-    this.setState({ query, images: [], page: 1, totalImages: 0 });
+
+    setQuery(searchQuery);
+    setImages([]);
+    setPage(1);
   };
 
-  incrementPage = () => this.setState(prev => ({ page: prev.page + 1 }));
+  const incrementPage = () => setPage(prev => prev + 1);
 
-  render() {
-    const { images, loading, totalImages, error } = this.state;
-    const showLoadMore = images.length !== totalImages && !loading;
+  const showLoadMore = images.length !== totalImages && !loading;
 
-    return (
-      <div className="App">
-        <SearchBar onFormSubmit={this.getQuery} />
+  return (
+    <div className="App">
+      <SearchBar onFormSubmit={getQuery} />
 
-        {images.length > 0 && <ImageGallery images={images} />}
+      {images.length > 0 && <ImageGallery images={images} />}
 
-        {showLoadMore && <Button onClick={this.incrementPage} />}
+      {showLoadMore && <Button onClick={incrementPage} />}
 
-        {loading && <Loader />}
+      {loading && <Loader />}
 
-        {error && <p>{error}</p>}
-      </div>
-    );
-  }
-}
+      {error && <p>{error}</p>}
+    </div>
+  );
+};
+
+export default App;

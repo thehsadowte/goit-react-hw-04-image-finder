@@ -7,3 +7,4 @@ const Button = ({ onClick }) => {
 };
 
 export default Button;
+
